@@ -47,6 +47,7 @@ feeds = [{'source':'la_nacion','category':'politica','url':'http://contenidos.la
 # Initialize destination DataFrame
 df = pd.DataFrame(columns=['source','category','date','title','text','link'])
 df = pd.read_csv('news.csv',usecols=['source','category','date','title','text','link'])
+print("CSV Loaded")
 
 # Define Functions
 def remove_html_tags(text):
@@ -92,12 +93,14 @@ def get_news(rss):
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':get_news_tag(entry.link),'link':entry.link}
       df = df.append(new_row, ignore_index=True)
+
   else:
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
       df = df.append(new_row, ignore_index=True)
 
 # Iterate RSS feeds list and append destination DF
+print("Pulling from every RSS")
 for feed in feeds:
   get_news(feed)
 
@@ -107,15 +110,17 @@ compl = ant.append(df, ignore_index=True)
 # Sanitize duplicate rows taking url as key
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
 
-# Store previous CSV as a backup with today's date and dump updated CSV as news.csv
+# Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
 bk_filename = 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
 filename = 'news.csv'
 # Check if backup already exists
 files_present = glob.glob(bk_filename)
 # If not , backup previous CSV
 if not files_present:
+    print("Write daily backup")
     df.to_csv(bk_filename,index=False)
 else:
     print("Backup already exists")
 # Write new consolidated CSV
+print("Write final CSV")
 compl.to_csv(filename,index=False)
