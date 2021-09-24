@@ -1,18 +1,15 @@
-!pip install feedparser
-!pip install --upgrade gupload
+#!pip install feedparser
+#!pip install --upgrade gupload
+import os
+import glob
 import html
 import json
 import requests
 from bs4 import BeautifulSoup
 import feedparser
-import webbrowser
 import re
 import pandas as pd
-from datetime import datetimeimpor
-from pydrive.auth import GoogleAuth
-from google.colab import auth
-from google.colab import files
-from google.colab import drive
+from datetime import datetime
 
 # Define Feeds in the form of a dict entry: media name, news category, rss url
 feeds = [{'source':'la_nacion','category':'politica','url':'http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=30'},\
@@ -47,11 +44,9 @@ feeds = [{'source':'la_nacion','category':'politica','url':'http://contenidos.la
          #{'source':'perfil','category':'opinion','url':'https://www.perfil.com/feed/opinion'}
          ]
 
-# Initialize Destination DataFrame
-drive.mount('/content/drive')
-news_path = F"/content/drive/MyDrive/news/news.csv"
+# Initialize destination DataFrame
 df = pd.DataFrame(columns=['source','category','date','title','text','link'])
-#df = pd.read_csv(news_path,usecols=['source','category','date','title','text','link'])
+df = pd.read_csv('news.csv',usecols=['source','category','date','title','text','link'])
 
 # Define Functions
 def remove_html_tags(text):
@@ -106,21 +101,21 @@ def get_news(rss):
 for feed in feeds:
   get_news(feed)
 
-df.to_csv('test.csv')
-files.download('test.csv')
-
-df[100:101].link
-
-df.shape
-
+# Retrieve previous dataset and append new results
+ant = pd.read_csv('news.csv',usecols=['source','category','date','title','text','link'])
+compl = ant.append(df, ignore_index=True)
 # Sanitize duplicate rows taking url as key
-df.drop_duplicates(subset='link', keep="first",inplace=True)
+compl.drop_duplicates(subset='link', keep="first",inplace=True)
 
 # Store previous CSV as a backup with today's date and dump updated CSV as news.csv
-import os
-bk_filename = 'news_bk_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
-bk_path = F"/content/drive/MyDrive/news/{bk_filename}" 
-os.rename("/content/drive/MyDrive/news/news.csv",bk_path)
+bk_filename = 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
 filename = 'news.csv'
-path = F"/content/drive/MyDrive/news/{filename}" 
-df.to_csv(path,index=False)
+# Check if backup already exists
+files_present = glob.glob(bk_filename)
+# If not , backup previous CSV
+if not files_present:
+    df.to_csv(bk_filename,index=False)
+else:
+    print("Backup already exists")
+# Write new consolidated CSV
+compl.to_csv(filename,index=False)
