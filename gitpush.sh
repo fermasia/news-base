@@ -1,4 +1,4 @@
-python rss_pull.py
+python /home/ec2-user/news-base/rss_pull.py
 cd /home/ec2-user/news-base
 git add .
 git commit -m "Commited Automatically"
