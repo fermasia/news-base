@@ -46,7 +46,7 @@ feeds = [{'source':'la_nacion','category':'politica','url':'http://contenidos.la
 
 # Initialize destination DataFrame
 df = pd.DataFrame(columns=['source','category','date','title','text','link'])
-df = pd.read_csv('news.csv',usecols=['source','category','date','title','text','link'])
+df = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
 print("CSV Loaded")
 
 # Define Functions
@@ -105,14 +105,14 @@ for feed in feeds:
   get_news(feed)
 
 # Retrieve previous dataset and append new results
-ant = pd.read_csv('news.csv',usecols=['source','category','date','title','text','link'])
+ant = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
 compl = ant.append(df, ignore_index=True)
 # Sanitize duplicate rows taking url as key
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
 
 # Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
-bk_filename = 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
-filename = 'news.csv'
+bk_filename = '/home/ec2-user/news-base/news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
+filename = '/home/ec2-user/news-base/news.csv'
 # Check if backup already exists
 files_present = glob.glob(bk_filename)
 # If not , backup previous CSV
