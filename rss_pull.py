@@ -26,8 +26,8 @@ feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.co
          ]
 
 # Initialize destination DataFrame
-df = pd.DataFrame(columns=['source','category','date','title','text','link'])
-#df = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
+#df = pd.DataFrame(columns=['source','category','date','title','text','link'])
+df = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
 print("CSV Loaded")
 
 # Define Functions
