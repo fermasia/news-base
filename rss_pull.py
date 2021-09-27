@@ -1,5 +1,3 @@
-#!pip install feedparser
-#!pip install --upgrade gupload
 import os
 import glob
 import html
@@ -29,19 +27,7 @@ feeds = [{'source':'la_nacion','category':'politica','url':'http://contenidos.la
          {'source':'clarin','category':'mundo','url':'https://www.clarin.com/rss/mundo/'},\
          {'source':'clarin','category':'economia','url':'https://www.clarin.com/rss/economia/'},\
          {'source':'clarin','category':'sociedad','url':'https://www.clarin.com/rss/sociedad/'},\
-         {'source':'clarin','category':'opinion','url':'	https://www.clarin.com/rss/opinion/'},\
-        # \
-         #{'source':'ambito','category':'politica','url':'https://www.ambito.com/rss/politica.xml'},\
-         #{'source':'ambito','category':'mundo','url':'https://www.ambito.com/rss/mundo.xml'},\
-         #{'source':'ambito','category':'economia','url':'https://www.ambito.com/rss/economia.xml'},\
-         #{'source':'ambito','category':'sociedad','url':'https://www.ambito.com/rss/informacion-general.xml'},\
-         #{'source':'ambito','category':'opinion','url':'	https://www.ambito.com/rss/opinion.xml'}\
-        # \
-         #{'source':'perfil','category':'politica','url':'https://www.perfil.com/feed/politica'},\
-         #{'source':'perfil','category':'mundo','url':'https://www.perfil.com/feed/internacionales'},\
-         #{'source':'perfil','category':'economia','url':'https://www.perfil.com/feed/economia'},\
-         #{'source':'perfil','category':'sociedad','url':'https://www.perfil.com/feed/sociedad'},\
-         #{'source':'perfil','category':'opinion','url':'https://www.perfil.com/feed/opinion'}
+         {'source':'clarin','category':'opinion','url':'	https://www.clarin.com/rss/opinion/'}
          ]
 
 # Initialize destination DataFrame
@@ -56,6 +42,7 @@ def remove_html_tags(text):
     clean_text = re.sub(clean, '', text)
     unescaped_text = html.unescape(clean_text)
     unescaped_text = unescaped_text.replace("\n", " ")
+    unescaped_text = unescaped_text.replace("\'", " ")
     return unescaped_text
 
 def get_articlebody(link):
@@ -106,24 +93,29 @@ for feed in feeds:
   get_news(feed)
 
 # Retrieve previous dataset and append new results
-ant = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
+news_path = '/home/ec2-user/news-base/news.csv'
+ant = pd.read_csv(news_path,usecols=['source','category','date','title','text','link'])
 compl = ant.append(df, ignore_index=True)
 
 # Sanitize duplicate rows taking url as key
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
-compl.text = compl.text.replace("\n", " ") #temporary fix
+compl.text = compl.text.replace("\n", " ") 
+compl['text'] = compl['text'].replace(r'\n',' ', regex=True) #temporary fix 
+compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix 
 
 # Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
 bk_filename = '/home/ec2-user/news-base/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d'+'.csv')
-filename = '/home/ec2-user/news-base/news.csv'
+
 # Check if backup already exists
 files_present = glob.glob(bk_filename)
+
 # If not , backup previous CSV
 if not files_present:
     print("Write daily backup")
     df.to_csv(bk_filename,index=False)
 else:
     print("Backup already exists")
+
 # Write new consolidated CSV
 print("Write final CSV")
-compl.to_csv(filename,index=False)
+compl.to_csv(news_path,index=False)
