@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 import feedparser
 import re
 import pandas as pd
-from datetime import datetime
+from datetime import datetime , timedelta
 
 # Define Feeds in the form of a dict entry: media name, news category, rss url
 feeds = [{'source':'la_nacion','category':'politica','url':'http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=30'},\
@@ -111,7 +111,7 @@ compl = ant.append(df, ignore_index=True)
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
 
 # Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
-bk_filename = '/home/ec2-user/news-base/news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
+bk_filename = '/home/ec2-user/news-base/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d'+'.csv')
 filename = '/home/ec2-user/news-base/news.csv'
 # Check if backup already exists
 files_present = glob.glob(bk_filename)
