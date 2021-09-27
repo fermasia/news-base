@@ -1,3 +1,5 @@
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate base
 cd /home/ec2-user/news-base
 mkdir PRUEBA
 conda activate base
