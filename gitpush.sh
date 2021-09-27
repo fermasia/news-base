@@ -1,7 +1,6 @@
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate base
 cd /home/ec2-user/news-base
 mkdir PRUEBA
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate base
 python /home/ec2-user/news-base/rss_pull.py
 git add .
