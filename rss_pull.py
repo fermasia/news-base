@@ -10,12 +10,7 @@ import pandas as pd
 from datetime import datetime , timedelta
 
 # Define Feeds in the form of a dict entry: media name, news category, rss url
-feeds = [{'source':'la_nacion','category':'politica','url':'http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=30'},\
-         {'source':'la_nacion','category':'mundo','url':' http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=7'},\
-         {'source':'la_nacion','category':'economia','url':'http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=272'},\
-         {'source':'la_nacion','category':'sociedad','url':'http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=7773'},\
-         {'source':'la_nacion','category':'opinion','url':'http://contenidos.lanacion.com.ar/herramientas/rss/categoria_id=28'},\
-         {'source':'la_nacion','category':'portada','url':' http://contenidos.lanacion.com.ar/herramientas/rss/origen=1'},\
+feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.com.ar/arcio/rss/'},\
          \
          {'source':'pagina_12','category':'politica','url':'https://www.pagina12.com.ar/rss/secciones/el-pais/notas'},\
          {'source':'pagina_12','category':'mundo','url':'https://www.pagina12.com.ar/rss/secciones/el-mundo/notas'},\
@@ -81,7 +76,23 @@ def get_news(rss):
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':get_news_tag(entry.link),'link':entry.link}
       df = df.append(new_row, ignore_index=True)
-
+  elif rss['source'] == 'la_nacion':
+    for entry in data.entries:
+      if "politica" in entry.link:
+        new_row = {'source':rss['source'],'category':'politica','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
+      elif "mundo" in entry.link:
+        new_row = {'source':rss['source'],'category':'mundo','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
+      elif "economia" in entry.link:
+        new_row = {'source':rss['source'],'category':'economia','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
+      elif "sociedad" in entry.link:
+        new_row = {'source':rss['source'],'category':'sociedad','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
+      elif "opinion" in entry.link:
+        new_row = {'source':rss['source'],'category':'opinion','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
   else:
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
@@ -104,14 +115,14 @@ compl['text'] = compl['text'].replace(r'\n',' ', regex=True) #temporary fix
 compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix 
 
 # Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
-bk_filename = '/home/ec2-user/news-base/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d'+'.csv')
+bk_filename = '/home/ec2-user/news-base/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d %H:%M:%S'+'.csv')
 
 # Check if backup already exists
 files_present = glob.glob(bk_filename)
 
 # If not , backup previous CSV
 if not files_present:
-    print("Write daily backup")
+    print("Write backup")
     df.to_csv(bk_filename,index=False)
 else:
     print("Backup already exists")
