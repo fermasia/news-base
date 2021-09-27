@@ -55,6 +55,7 @@ def remove_html_tags(text):
     clean = re.compile('<.*?>')
     clean_text = re.sub(clean, '', text)
     unescaped_text = html.unescape(clean_text)
+    unescaped_text = unescaped_text.replace("\n", " ")
     return unescaped_text
 
 def get_articlebody(link):
@@ -107,8 +108,10 @@ for feed in feeds:
 # Retrieve previous dataset and append new results
 ant = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
 compl = ant.append(df, ignore_index=True)
+
 # Sanitize duplicate rows taking url as key
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
+compl.text = compl.text.replace("\n", " ") #temporary fix
 
 # Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
 bk_filename = '/home/ec2-user/news-base/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d'+'.csv')
