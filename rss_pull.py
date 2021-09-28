@@ -12,6 +12,8 @@ from datetime import datetime , timedelta
 # Define Feeds in the form of a dict entry: media name, news category, rss url
 feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.com.ar/arcio/rss/'},\
          \
+         {'source':'infobae','category':'todas','url':'https://www.infobae.com/argentina-rss.xml'},\
+         \
          {'source':'pagina_12','category':'politica','url':'https://www.pagina12.com.ar/rss/secciones/el-pais/notas'},\
          {'source':'pagina_12','category':'mundo','url':'https://www.pagina12.com.ar/rss/secciones/el-mundo/notas'},\
          {'source':'pagina_12','category':'economia','url':'https://www.pagina12.com.ar/rss/secciones/economia/notas'},\
@@ -93,6 +95,20 @@ def get_news(rss):
       elif "opinion" in entry.link:
         new_row = {'source':rss['source'],'category':'opinion','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
         df = df.append(new_row, ignore_index=True)
+  elif rss['source'] == 'infobae':
+    for entry in data.entries:
+      if "politica" in entry.link:
+        new_row = {'source':rss['source'],'category':'politica','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
+      elif "america" in entry.link:
+        new_row = {'source':rss['source'],'category':'mundo','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
+      elif "economia" in entry.link:
+        new_row = {'source':rss['source'],'category':'economia','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
+      elif "sociedad" in entry.link:
+        new_row = {'source':rss['source'],'category':'sociedad','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        df = df.append(new_row, ignore_index=True)
   else:
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
@@ -111,11 +127,11 @@ compl = ant.append(df, ignore_index=True)
 # Sanitize duplicate rows taking url as key
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
 compl.text = compl.text.replace("\n", " ") 
-compl['text'] = compl['text'].replace(r'\n',' ', regex=True) #temporary fix 
-compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix 
+compl['text'] = compl['text'].replace(r'\n',' ', regex=True) #temporary fix incomplete unescaping
+compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix incomplete unescaping
 
 # Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
-bk_filename = '/home/ec2-user/news-base/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d %H:%M:%S'+'.csv')
+bk_filename = '/home/ec2-user/news-base/backups/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d %H:%M:%S'+'.csv')
 
 # Check if backup already exists
 files_present = glob.glob(bk_filename)
