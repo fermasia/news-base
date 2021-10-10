@@ -131,17 +131,17 @@ compl['text'] = compl['text'].replace(r'\n',' ', regex=True) #temporary fix inco
 compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix incomplete unescaping
 
 # Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
-bk_filename = '/home/ec2-user/news-base/backups/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d %H:%M:%S'+'.csv')
+#bk_filename = '/home/ec2-user/news-base/backups/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d %H:%M:%S'+'.csv')
 
 # Check if backup already exists
-files_present = glob.glob(bk_filename)
+#files_present = glob.glob(bk_filename)
 
 # If not , backup previous CSV
-if not files_present:
-    print("Write backup")
-    df.to_csv(bk_filename,index=False)
-else:
-    print("Backup already exists")
+#if not files_present:
+#    print("Write backup")
+#    df.to_csv(bk_filename,index=False)
+#else:
+#    print("Backup already exists")
 
 # Write new consolidated CSV
 print("Write final CSV")
