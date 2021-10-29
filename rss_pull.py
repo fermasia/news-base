@@ -130,6 +130,9 @@ compl.text = compl.text.replace("\n", " ")
 compl['text'] = compl['text'].replace(r'\n',' ', regex=True) #temporary fix incomplete unescaping
 compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix incomplete unescaping
 
+# Make sure max lenght of articles is 40.000 characters
+compl['text'] = compl.text.str[:40000]
+
 # Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
 #bk_filename = '/home/ec2-user/news-base/backups/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d %H:%M:%S'+'.csv')
 
