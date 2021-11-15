@@ -28,8 +28,8 @@ feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.co
          ]
 
 # Initialize destination DataFrame
-#df = pd.DataFrame(columns=['source','category','date','title','text','link'])
-df = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
+df = pd.DataFrame(columns=['source','category','date','title','text','link'])
+#df = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
 print("CSV Loaded")
 
 # Define Functions
@@ -120,7 +120,7 @@ for feed in feeds:
   get_news(feed)
 
 # Retrieve previous dataset and append new results
-news_path = '/home/ec2-user/news-base/news.csv'
+news_path = 'https://newsbucketmas.s3.us-east-2.amazonaws.com/news.csv'
 ant = pd.read_csv(news_path,usecols=['source','category','date','title','text','link'])
 compl = ant.append(df, ignore_index=True)
 
