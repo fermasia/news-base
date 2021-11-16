@@ -148,4 +148,4 @@ compl['text'] = compl.text.str[:40000]
 
 # Write new consolidated CSV
 print("Write final CSV")
-compl.to_csv(news_path,index=False)
+compl.to_csv('/home/ec2-user/news-base/news.csv',index=False)
