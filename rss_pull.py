@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import feedparser
 import re
 import pandas as pd
-from datetime import datetime , timedelta
+import datetime
 
 # Define Feeds in the form of a dict entry: media name, news category, rss url
 feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.com.ar/arcio/rss/'},\
@@ -29,8 +29,11 @@ feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.co
 
 # Initialize destination DataFrame
 df = pd.DataFrame(columns=['source','category','date','title','text','link'])
-#df = pd.read_csv('/home/ec2-user/news-base/news.csv',usecols=['source','category','date','title','text','link'])
 print("CSV Loaded")
+
+# Current Filename
+current = datetime.datetime.now().strftime("%Y") + datetime.datetime.now().strftime("%m")
+current_filename = current + ".csv"
 
 # Define Functions
 def remove_html_tags(text):
@@ -120,9 +123,14 @@ for feed in feeds:
   get_news(feed)
 
 # Retrieve previous dataset and append new results
-news_path = 'https://newsbucketmas.s3.us-east-2.amazonaws.com/news.csv'
-ant = pd.read_csv(news_path,usecols=['source','category','date','title','text','link'])
-compl = ant.append(df, ignore_index=True)
+news_path = 'https://newsbucketmas.s3.us-east-2.amazonaws.com/' + current_filename
+try:
+   ant = pd.read_csv(news_path,usecols=['source','category','date','title','text','link'])
+   print("appending to existing file")
+   compl = ant.append(df, ignore_index=True)
+except:
+   print("file doesn't exist, create new one")
+   compl = df
 
 # Sanitize duplicate rows taking url as key
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
@@ -133,19 +141,12 @@ compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix inco
 # Make sure max lenght of articles is 40.000 characters
 compl['text'] = compl.text.str[:40000]
 
-# Store previous 'news_' + datetime.today().strftime('%Y-%m-%d'+'.csv')
-#bk_filename = '/home/ec2-user/news-base/backups/news_' + (datetime.today() - timedelta(hours=3, minutes=00)).strftime('%Y-%m-%d %H:%M:%S'+'.csv')
-
-# Check if backup already exists
-#files_present = glob.glob(bk_filename)
-
-# If not , backup previous CSV
-#if not files_present:
-#    print("Write backup")
-#    df.to_csv(bk_filename,index=False)
-#else:
-#    print("Backup already exists")
-
 # Write new consolidated CSV
 print("Write final CSV")
-compl.to_csv('/home/ec2-user/news-base/news.csv',index=False)
+compl.to_csv(current_filename,index=False)
+cmd1 = "aws s3 cp " + current_filename + " s3://newsbucketmas"
+os.system(cmd1)
+print("push " + current_filename + "to AWS S3")
+cmd2 = "rm "+ current_filename
+os.system(cmd2)
+print("delete local temp file " + current_filename)
