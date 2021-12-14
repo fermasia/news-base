@@ -40,6 +40,7 @@ def remove_html_tags(text):
     """Remove html tags from a string"""
     clean = re.compile('<.*?>')
     clean_text = re.sub(clean, '', text)
+    #unescaped_text = clean_text
     unescaped_text = html.unescape(clean_text)
     unescaped_text = unescaped_text.replace("\n", " ")
     unescaped_text = unescaped_text.replace("\'", " ")
@@ -48,7 +49,10 @@ def remove_html_tags(text):
 def get_articlebody(link):
   """ Receives an html link containing a news article and returns
   a plain text string with the article body"""
-  soup = BeautifulSoup(requests.get(link).content, "html.parser")
+  s = requests.Session()
+  s.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
+  r = s.get(link)
+  soup = BeautifulSoup(r.content, "html.parser")
   json_data = json.loads(soup.find(type="application/ld+json").string)
   return(json_data['description'])
 
@@ -56,7 +60,10 @@ def get_news_tag(link):
   """ Receives an html link containing a news article and finds the "news-content" tag
   to retrieve a plain text string with the article body"""
   try:
-    r = requests.get(link, headers=headers)
+    # r = requests.get(link, headers=headers) --needs to be deleted
+    s = requests.Session()
+    s.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
+    r = s.get(link)
     soup = BeautifulSoup(r.text, 'lxml')
     container = soup.find('div', class_='news-content')
     if container is None:
