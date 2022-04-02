@@ -9,6 +9,9 @@ import re
 import pandas as pd
 import datetime
 
+#import warnings
+#warnings.filterwarnings("error")
+
 # Define Feeds in the form of a dict entry: media name, news category, rss url
 feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.com.ar/arcio/rss/'},\
          \
@@ -83,46 +86,58 @@ def get_news(rss):
   if rss['source'] in ['clarin','ambito']:
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(get_articlebody(entry.link)),'link':entry.link}
-      df = df.append(new_row, ignore_index=True)
+      new_row = pd.DataFrame([new_row])
+      df = pd.concat([df,new_row])
   elif rss['source'] == 'perfil':
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':get_news_tag(entry.link),'link':entry.link}
-      df = df.append(new_row, ignore_index=True)
+      new_row = pd.DataFrame([new_row])
+      df = pd.concat([df,new_row])
   elif rss['source'] == 'la_nacion':
     for entry in data.entries:
       if "politica" in entry.link:
         new_row = {'source':rss['source'],'category':'politica','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
       elif "mundo" in entry.link:
         new_row = {'source':rss['source'],'category':'mundo','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
       elif "economia" in entry.link:
         new_row = {'source':rss['source'],'category':'economia','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
       elif "sociedad" in entry.link:
         new_row = {'source':rss['source'],'category':'sociedad','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
       elif "opinion" in entry.link:
         new_row = {'source':rss['source'],'category':'opinion','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
   elif rss['source'] == 'infobae':
     for entry in data.entries:
       if "politica" in entry.link:
         new_row = {'source':rss['source'],'category':'politica','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
       elif "america" in entry.link:
         new_row = {'source':rss['source'],'category':'mundo','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
       elif "economia" in entry.link:
         new_row = {'source':rss['source'],'category':'economia','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
       elif "sociedad" in entry.link:
         new_row = {'source':rss['source'],'category':'sociedad','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-        df = df.append(new_row, ignore_index=True)
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
   else:
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
-      df = df.append(new_row, ignore_index=True)
+      new_row = pd.DataFrame([new_row])
+      df = pd.concat([df,new_row])
 
 # Iterate RSS feeds list and append destination DF
 print("Pulling from every RSS")
@@ -130,9 +145,9 @@ for feed in feeds:
   get_news(feed)
 
 # Retrieve previous dataset and append new results
-news_path = 'https://newsbucketmas.s3.us-east-2.amazonaws.com/' + current_filename
+news_path = '/home/fmasia/' + current_filename
 try:
-   ant = pd.read_csv(news_path,usecols=['source','category','date','title','text','link'])
+   ant = pd.read_csv(news_path+'.gz',compression='gzip',usecols=['source','category','date','title','text','link'])
    print("appending to existing file")
    compl = ant.append(df, ignore_index=True)
 except:
@@ -149,11 +164,13 @@ compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix inco
 compl['text'] = compl.text.str[:40000]
 
 # Write new consolidated CSV
-print("Write final CSV")
+print("Write final CSV and GZipping it")
 compl.to_csv(current_filename,index=False)
-cmd1 = "aws s3 cp " + current_filename + " s3://newsbucketmas"
-os.system(cmd1)
-print("push " + current_filename + "to AWS S3")
-cmd2 = "rm "+ current_filename
-os.system(cmd2)
-print("delete local temp file " + current_filename)
+cmd = "gzip -f " + current_filename
+os.system(cmd)
+#cmd1 = "aws s3 cp " + current_filename + " s3://newsbucketmas"
+#os.system(cmd1)
+#print("push " + current_filename + "to AWS S3")
+#cmd2 = "rm "+ current_filename
+#os.system(cmd2)
+#print("delete local temp file " + current_filename)
