@@ -22,12 +22,14 @@ feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.co
          {'source':'pagina_12','category':'economia','url':'https://www.pagina12.com.ar/rss/secciones/economia/notas'},\
          {'source':'pagina_12','category':'sociedad','url':'https://www.pagina12.com.ar/rss/secciones/sociedad/notas'},\
          {'source':'pagina_12','category':'portada','url':'https://www.pagina12.com.ar/rss/portada'},\
+         {'source':'pagina_12','category':'deportes','url':'https://www.pagina12.com.ar/rss/secciones/deportes/notas'},\
          \
          {'source':'clarin','category':'politica','url':'https://www.clarin.com/rss/politica/'},\
          {'source':'clarin','category':'mundo','url':'https://www.clarin.com/rss/mundo/'},\
          {'source':'clarin','category':'economia','url':'https://www.clarin.com/rss/economia/'},\
          {'source':'clarin','category':'sociedad','url':'https://www.clarin.com/rss/sociedad/'},\
          {'source':'clarin','category':'opinion','url':'https://www.clarin.com/rss/opinion/'}
+         {'source':'clarin','category':'deportes','url':'https://www.clarin.com/rss/deportes/'}
          ]
 
 # Initialize destination DataFrame
@@ -99,6 +101,10 @@ def get_news(rss):
         new_row = {'source':rss['source'],'category':'politica','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
         new_row = pd.DataFrame([new_row])
         df = pd.concat([df,new_row])
+      elif "deportes" in entry.link:
+        new_row = {'source':rss['source'],'category':'deportes','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
       elif "mundo" in entry.link:
         new_row = {'source':rss['source'],'category':'mundo','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
         new_row = pd.DataFrame([new_row])
@@ -133,6 +139,11 @@ def get_news(rss):
         new_row = {'source':rss['source'],'category':'sociedad','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
         new_row = pd.DataFrame([new_row])
         df = pd.concat([df,new_row])
+      elif "deportes" in entry.link:
+        new_row = {'source':rss['source'],'category':'deportes','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
+        new_row = pd.DataFrame([new_row])
+        df = pd.concat([df,new_row])
+
   else:
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
