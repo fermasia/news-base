@@ -28,7 +28,7 @@ feeds = [{'source':'la_nacion','category':'todas','url':'https://www.lanacion.co
          {'source':'clarin','category':'mundo','url':'https://www.clarin.com/rss/mundo/'},\
          {'source':'clarin','category':'economia','url':'https://www.clarin.com/rss/economia/'},\
          {'source':'clarin','category':'sociedad','url':'https://www.clarin.com/rss/sociedad/'},\
-         {'source':'clarin','category':'opinion','url':'https://www.clarin.com/rss/opinion/'}
+         {'source':'clarin','category':'opinion','url':'https://www.clarin.com/rss/opinion/'},\
          {'source':'clarin','category':'deportes','url':'https://www.clarin.com/rss/deportes/'}
          ]
 
