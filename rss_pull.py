@@ -143,7 +143,6 @@ def get_news(rss):
         new_row = {'source':rss['source'],'category':'deportes','date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
         new_row = pd.DataFrame([new_row])
         df = pd.concat([df,new_row])
-
   else:
     for entry in data.entries:
       new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(entry.content[0].value),'link':entry.link}
@@ -167,7 +166,7 @@ except:
 
 # Sanitize duplicate rows taking url as key
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
-compl.text = compl.text.replace("\n", " ") 
+compl.text = compl.text.replace("\n", " ")
 compl['text'] = compl['text'].replace(r'\n',' ', regex=True) #temporary fix incomplete unescaping
 compl['text'] = compl['text'].replace(r'\'',' ', regex=True) #temporary fix incomplete unescaping
 
