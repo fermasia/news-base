@@ -155,7 +155,7 @@ for feed in feeds:
   get_news(feed)
 
 # Retrieve previous dataset and append new results
-news_path = '/home/fmasia/' + current_filename
+news_path = '/home/fmasia/news-base/files/' + current_filename
 try:
    ant = pd.read_csv(news_path+'.gz',compression='gzip',usecols=['source','category','date','title','text','link'])
    print("appending to existing file")
@@ -176,7 +176,7 @@ compl['text'] = compl.text.str[:40000]
 # Write new consolidated CSV
 print("Write final CSV and GZipping it")
 compl.to_csv(current_filename,index=False)
-cmd = "gzip -f " + current_filename
+cmd = "cd /home/fmasia/news-base/files && gzip -f " + current_filename
 os.system(cmd)
 #cmd1 = "aws s3 cp " + current_filename + " s3://newsbucketmas"
 #os.system(cmd1)

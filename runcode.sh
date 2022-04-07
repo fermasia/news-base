@@ -1,1 +1,1 @@
-python3 /home/ec2-user/news-base/rss_pull.py
+python3 /home/fmasia/news-base/rss_pull.py
