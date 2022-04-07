@@ -175,7 +175,7 @@ compl['text'] = compl.text.str[:40000]
 
 # Write new consolidated CSV
 print("Write final CSV and GZipping it")
-compl.to_csv(current_filename,index=False)
+compl.to_csv("/home/fmasia/news-base/files/" + current_filename,index=False)
 cmd = "cd /home/fmasia/news-base/files && gzip -f " + current_filename
 os.system(cmd)
 #cmd1 = "aws s3 cp " + current_filename + " s3://newsbucketmas"
