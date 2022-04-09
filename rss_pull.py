@@ -159,7 +159,7 @@ news_path = '/home/fmasia/news-base/files/' + current_filename
 try:
    ant = pd.read_csv(news_path+'.gz',compression='gzip',usecols=['source','category','date','title','text','link'])
    print("appending to existing file")
-   compl = ant.append(df, ignore_index=True)
+   compl = pd.concat([ant,df])
 except:
    print("file doesn't exist, create new one")
    compl = df
