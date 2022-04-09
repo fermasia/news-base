@@ -8,6 +8,20 @@ import feedparser
 import re
 import pandas as pd
 import datetime
+from sqlalchemy import create_engine
+
+def connect(params_dic):
+    """ Connect to the PostgreSQL database server """
+    conn = None
+    try:
+        # connect to the PostgreSQL server
+        print('Connecting to the PostgreSQL database...')
+        conn = psycopg2.connect(**params_dic)
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        sys.exit(1)
+    print("Connection successful")
+    return conn
 
 #import warnings
 #warnings.filterwarnings("error")
@@ -178,9 +192,46 @@ print("Write final CSV and GZipping it")
 compl.to_csv("/home/fmasia/news-base/files/" + current_filename,index=False)
 cmd = "cd /home/fmasia/news-base/files && gzip -f " + current_filename
 os.system(cmd)
+
 #cmd1 = "aws s3 cp " + current_filename + " s3://newsbucketmas"
 #os.system(cmd1)
 #print("push " + current_filename + "to AWS S3")
 #cmd2 = "rm "+ current_filename
 #os.system(cmd2)
 #print("delete local temp file " + current_filename)
+
+
+# UPSERT TO PSQL
+
+#param_dic = {
+#    "host"      : "localhost",
+#    "database"  : "fmasia",
+#    "user"      : "fmasia",
+#    "password"  : "password"
+#}
+
+#connect = "postgresql+psycopg2://%s:%s@%s:5432/%s" % (
+#    param_dic['user'],
+#    param_dic['password'],
+#    param_dic['host'],
+#    param_dic['database']
+#)
+
+#engine = create_engine(connect)
+
+#df_table = Table('news', meta,
+#                 Column('source', text),
+#                 Column('category', text),
+#                 Column('pubdate', timestamp),
+#                 Column('title', text),
+#                 Column('description', text),
+#                 Column('link', text)
+#                )
+
+#insert_statement = postgresql.insert(df_table).values(df.to_dict(orient='records'))
+#upsert_statement = insert_statement.on_conflict_do_update(
+#    index_elements=['id'],
+#    set_={c.key: c for c in insert_statement.excluded if c.key != 'id'})
+#conn.execute(upsert_statement)
+
+
