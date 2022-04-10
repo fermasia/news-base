@@ -203,35 +203,30 @@ os.system(cmd)
 
 # UPSERT TO PSQL
 
-#param_dic = {
-#    "host"      : "localhost",
-#    "database"  : "fmasia",
-#    "user"      : "fmasia",
-#    "password"  : "password"
-#}
+# Define connection parameters
+param_dic = {
+    "host"      : "localhost",
+    "database"  : "fmasia",
+    "user"      : "fmasia",
+    "password"  : "password"
+}
 
-#connect = "postgresql+psycopg2://%s:%s@%s:5432/%s" % (
-#    param_dic['user'],
-#    param_dic['password'],
-#    param_dic['host'],
-#    param_dic['database']
-#)
+# Build Connection
+connect = "postgresql+psycopg2://%s:%s@%s:5432/%s" % (
+    param_dic['user'],
+    param_dic['password'],
+    param_dic['host'],
+    param_dic['database']
+)
 
-#engine = create_engine(connect)
+# Actually connect to Database
+engine = create_engine(connect)
 
-#df_table = Table('news', meta,
-#                 Column('source', text),
-#                 Column('category', text),
-#                 Column('pubdate', timestamp),
-#                 Column('title', text),
-#                 Column('description', text),
-#                 Column('link', text)
-#                )
-
-#insert_statement = postgresql.insert(df_table).values(df.to_dict(orient='records'))
-#upsert_statement = insert_statement.on_conflict_do_update(
-#    index_elements=['id'],
-#    set_={c.key: c for c in insert_statement.excluded if c.key != 'id'})
-#conn.execute(upsert_statement)
-
-
+# Read existing entries
+links = pd.read_sql_table('news',con=engine)
+links = links['link'].to_list()
+to_insert = df[~df.link.isin(links)]
+if not to_insert.empty:
+    to_insert.to_sql('news', con=engine, if_exists='append',index=False)
+    print(len(to_insert.link),'inserted rows in db news')
+del to_insert
