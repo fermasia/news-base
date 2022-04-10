@@ -176,7 +176,7 @@ try:
    compl = pd.concat([ant,df])
 except:
    print("file doesn't exist, create new one")
-   compl = df
+   compl = df.copy()
 
 # Sanitize duplicate rows taking url as key
 compl.drop_duplicates(subset='link', keep="first",inplace=True)
@@ -193,6 +193,8 @@ compl.to_csv("/home/fmasia/news-base/files/" + current_filename,index=False)
 cmd = "cd /home/fmasia/news-base/files && gzip -f " + current_filename
 os.system(cmd)
 
+
+# Store in Amazon EC3
 #cmd1 = "aws s3 cp " + current_filename + " s3://newsbucketmas"
 #os.system(cmd1)
 #print("push " + current_filename + "to AWS S3")
@@ -201,7 +203,9 @@ os.system(cmd)
 #print("delete local temp file " + current_filename)
 
 
-# UPSERT TO PSQL
+#############################
+# UPSERT TO PSQL on premise
+#############################
 
 # Define connection parameters
 param_dic = {
@@ -225,7 +229,8 @@ engine = create_engine(connect)
 # Read existing entries
 links = pd.read_sql_table('news',con=engine)
 links = links['link'].to_list()
-to_insert = df[~df.link.isin(links)]
+to_insert = df.loc[~df.link.isin(links)]
+to_insert.drop_duplicates(subset='link', keep="first",inplace=True)
 if not to_insert.empty:
     to_insert.to_sql('news', con=engine, if_exists='append',index=False)
     print(len(to_insert.link),'inserted rows in db news')

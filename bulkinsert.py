@@ -34,7 +34,7 @@ connect = "postgresql+psycopg2://%s:%s@%s:5432/%s" % (
 engine = create_engine(connect)
 
 # Iterate files to prepare what to insert
-files = ['202112','202201','202202','202203']
+files = ['202112','202201','202202','202203','202204']
 
 for f in files:
     links = pd.read_sql_table('news',con=engine)['link'].to_list()   # Read existing entries
