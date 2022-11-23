@@ -75,6 +75,16 @@ def get_articlebody(link):
   json_data = json.loads(soup.find(type="application/ld+json").string)
   return(json_data['description'])
 
+def get_articleheadline(link):
+  """ Receives an html link containing a news article and returns
+  a plain text string with the article body"""
+  s = requests.Session()
+  s.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.131 Safari/537.36'
+  r = s.get(link)
+  soup = BeautifulSoup(r.content, "html.parser")
+  json_data = json.loads(soup.find(type="application/ld+json").string)
+  return(json_data['headline'] + json_data['alternativeHeadline'])
+
 def get_news_tag(link):
   """ Receives an html link containing a news article and finds the "news-content" tag
   to retrieve a plain text string with the article body"""
@@ -101,7 +111,7 @@ def get_news(rss):
   data = feedparser.parse(rss['url'])
   if rss['source'] in ['clarin','ambito']:
     for entry in data.entries:
-      new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(get_articlebody(entry.link)),'link':entry.link}
+      new_row = {'source':rss['source'],'category':rss['category'],'date':entry.published, 'title':entry.title, 'text':remove_html_tags(get_articleheadline(entry.link)),'link':entry.link}
       new_row = pd.DataFrame([new_row])
       df = pd.concat([df,new_row])
   elif rss['source'] == 'perfil':
@@ -166,7 +176,10 @@ def get_news(rss):
 # Iterate RSS feeds list and append destination DF
 print("Pulling from every RSS")
 for feed in feeds:
-  get_news(feed)
+  try:
+    get_news(feed)
+  except:
+    None
 
 # Retrieve previous dataset and append new results
 news_path = '/home/fmasia/news-base/files/' + current_filename
